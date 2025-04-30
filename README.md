@@ -1,6 +1,6 @@
 # Trail Tracer Automated Test Procedure
 ## Setting Up a Fresh RPi5
-SSH into the RPi and run the following commands:
+SSH into `ttpi_xxx@ttpi.loocal` the RPi and run the following commands:
 ```
 sudo apt update
 sudo apt full-upgrade
@@ -39,7 +39,7 @@ according to https://github.com/raspberrypi/openocd/issues/93 with some edits
 ```
 sudo apt install python3-libgpiod libgpiod-dev
 sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
-git clone --depth 1 --branch v0.12.0 https://github.com/raspberrypi/openocd.git
+git clone --depth 1 --branch v0.12.0 https://github.com/openocd-org/openocd.git
 cd openocd
 ./bootstrap
 export enable_linuxgpiod=yes
@@ -48,20 +48,10 @@ make -j 4
 sudo make install
 sudo reboot
 ```
-
-
-## OpenOCD
-```
-sudo apt install libgpiod-dev
-sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
-git clone https://github.com/raspberrypi/openocd.git
-cd openocd
-./bootstrap
-export enable_linuxgpiod=yes
-./configure
-make -j 4
-sudo make install
-```
+Interfaces  
+`cd /usr/local/share/openocd/scripts/interface`  
+Targets  
+`cd /usr/local/share/openocd/scripts/target`  
 
 OpenOCD RPi5 setup
 ```
@@ -95,6 +85,7 @@ mkdir stm32
 mkdir esp32
 cd ..
 ```
+
  Configure Rx STM32 OpenOCD
  ```
 cd rx/stm32
