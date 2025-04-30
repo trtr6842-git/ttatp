@@ -35,17 +35,18 @@ sudo unmount /edrv
 ```
 
 ## OpenOCD on RPi5
-according to https://github.com/raspberrypi/openocd/issues/93
+according to https://github.com/raspberrypi/openocd/issues/93 with some edits
 ```
 sudo apt install python3-libgpiod libgpiod-dev
 sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
-git clone https://github.com/raspberrypi/openocd.git
+git clone --depth 1 --branch v0.12.0 https://github.com/raspberrypi/openocd.git
 cd openocd
 ./bootstrap
 export enable_linuxgpiod=yes
 ./configure --enable-linuxgpiod
 make -j 4
 sudo make install
+sudo reboot
 ```
 
 
