@@ -128,7 +128,11 @@ UART0 can be enabled via raspi-config.\
 To enable more hardware UARTs, must manually edit config.txt.\
 `sudo nano /boot/firmware/config.txt`
 
-At the end, add `dtoverlay=uartx` where 'x' is the port number { 2 | 3 | 4 }
+At the end, add `dtoverlay=uartx` where 'x' is the port number { 2 | 3 | 4 }  
+Must reboot to take effect.
+
+#### Serial Monitor
+`python -m serial.tools.miniterm /dev/ttyAMA3 115200`
 
 #### 40-pin header UARTS:
 |/dev/tty* |UART#  |Tx/Rx Pins|GPIO Pins   |
