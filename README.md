@@ -141,3 +141,16 @@ Must reboot to take effect.
 |`ttyAMA2`|UART2|p7/p29|4/5|
 |`ttyAMA3`|UART3|p24/p21|8/9|
 |`ttyAMA4`|UART4|p32/p33|12/13|
+
+## RPi5 Flashing STM32 via UART
+Try stm32flash to flash directly via uart
+```
+git clone https://gitlab.com/stm32flash/stm32flash
+cd stm32flash
+make
+sudo make isntall
+stm32flash -b 115200 /dev/ttyAMA3
+cd ~/ttatp/ts/stm32
+stm32flash -b 115200 -w RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
+```
+
