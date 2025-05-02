@@ -154,3 +154,9 @@ cd ~/ttatp/ts/stm32
 stm32flash -b 115200 -w RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
 ```
 
+## SSH setup
+```
+ssh-keygen -b 2048 -t rsa
+ls ~/.ssh
+```
+
