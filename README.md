@@ -5,12 +5,15 @@ SSH into `ttpi_xxx@ttpi.loocal` the RPi and run the following commands:
 sudo apt update
 sudo apt full-upgrade
 sudo reboot
-python3 -mvenv atp-venv
 sudo apt install git
-source atp-venv/bin/activate
+git clone https://github.com/trtr6842-git/ttatp.git
+cd ttatp
+python3 -m venv .venv
+source .venv/bin/activate
 pip install esptool
 pip install git+https://bitbucket.org/subinitial/subinitial-automation.git
 deactivate
+cd ~
 ```
 
 ## RPi Connect
@@ -21,6 +24,11 @@ rpi-connect on
 loginctl enable-linger
 rpi-connect signin
 ```
+
+## Remote code development vis VS Code
+On remote development machine, open VS Code and install the 'Remote Development' Extension.
+Use `CTR + SHIFT + P` and search for `Remotre SSH: COnnect current window to host`
+
 
 ## Handling USB drives
 Create a dir to mount them to, then mount, then copy
@@ -39,7 +47,8 @@ according to https://github.com/raspberrypi/openocd/issues/93 with some edits
 ```
 sudo apt install python3-libgpiod libgpiod-dev
 sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
-git clone --depth 1 --branch v0.12.0 https://github.com/openocd-org/openocd.git
+# git clone --depth 1 --branch v0.12.0 https://github.com/openocd-org/openocd.git
+git clone https://github.com/raspberrypi/openocd.git
 cd openocd
 ./bootstrap
 export enable_linuxgpiod=yes
@@ -69,25 +78,8 @@ adapter gpio swclk 25 -chip 4
 adapter gpio swdio 24 -chip 4
 ```
 
-Openocd ttatp setup
+configure Rx STM32 OpenOCD
 ```
-cd ~
-mkdir ttatp
-cd ttatp
-mkdir tx
-mkdir rx
-cd rx
-mkdir stm32
-mkdir esp32
-cd ..
-cd tx
-mkdir stm32
-mkdir esp32
-cd ..
-```
-
- Configure Rx STM32 OpenOCD
- ```
 cd rx/stm32
 nano openocd.cfg
 ```
@@ -109,6 +101,9 @@ adapter_nsrst_assert_width 100
 init
 targets
 reset halt
+program RCTF_TT_RX_REVA_G070CBx.elf verify
+reset
+shutdown
 ```
 Then run
 ```
@@ -126,9 +121,14 @@ sudo openocd
 
 UART0 can be enabled via raspi-config.\
 To enable more hardware UARTs, must manually edit config.txt.\
-`sudo nano /boot/firmware/config.txt`
-
-At the end, add `dtoverlay=uartx` where 'x' is the port number { 2 | 3 | 4 }  
+```
+sudo nano /boot/firmware/config.txt
+```
+Then at the end add:
+```
+dtoverlay=uart1
+dtoverlay=uart2
+```
 Must reboot to take effect.
 
 #### Serial Monitor
