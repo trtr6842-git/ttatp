@@ -148,14 +148,7 @@ Try stm32flash to flash directly via uart
 git clone https://gitlab.com/stm32flash/stm32flash
 cd stm32flash
 make
-sudo make isntall
-stm32flash -b 115200 /dev/ttyAMA3
-cd ~/ttatp/ts/stm32
-stm32flash -b 115200 -w RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
+sudo make install
+cd ~/ttatp
+stm32flash -b 230400 -w ~/ttatp/tx/stm32/RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
 ```
-
-## SSH setup
-```
-
-```
-
