@@ -152,3 +152,12 @@ sudo make install
 cd ~/ttatp
 stm32flash -b 230400 -w ~/ttatp/tx/stm32/RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
 ```
+
+## Get RPi serial number
+```
+cat /proc/cpuinfo | grep Serial
+```
+In Python:
+```
+os.popen('cat /proc/cpuinfo | grep Serial').read()
+```

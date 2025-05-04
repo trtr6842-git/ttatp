@@ -63,9 +63,12 @@ class Atp(automation.TestDefinition):
 
     def post_run(self, data: Data):
         # Write the full test outcome to a .CSV file
+        
+        
+        
         part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "SerialNumber", "DateTime")
         filename = f"{part_number}_{serial_number}_{datetime}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
-        automation.CsvPublisher(self, Path(automation.locate_testroot(), "reports", filename)).generate()
+        automation.CsvPublisher(self, Path(automation.locate_testroot(), "reports", 'RPi_' + fixture.get_rpi_serial(), filename)).generate()
 
     def on_exit(self, data: Data):
         # Runs once just before the ATP unloads
