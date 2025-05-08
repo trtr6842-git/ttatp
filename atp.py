@@ -1,4 +1,5 @@
 #! .venv/bin/python
+import os
 from pathlib import Path
 import logging
 import subinitial.automation as automation
@@ -14,6 +15,7 @@ class Atp(automation.TestDefinition):
         self.title = "ATP Template"
         # ATP version/revision, displaying in TestCenter and generated SiSteps docs
         self.version = "v{major}.{minor}.{patch}".format(major=0, minor=1, patch=0)
+        
 
     class Data:
         def __init__(data):
@@ -28,7 +30,7 @@ class Atp(automation.TestDefinition):
         # Define the fields (user and automatic input to a test run)
         self.fields.add(
             automation.Field("TestVersion", default=self.version, is_static=True),
-            automation.Field("PartNumber", default="PN12345", is_static=True),
+            automation.Field("PartNumber", default="[AUTOMATIC]", is_static=True),
             automation.Field("SerialNumber", default=state.get("SerialNumber", ""), is_static=False),
             automation.Field("DateTime", default="[AUTOMATIC]", is_static=True),
             # ...
@@ -51,7 +53,8 @@ class Atp(automation.TestDefinition):
     def pre_run(self, data: Data):
         # Generate automatic fields
         self.fields.update_entries({
-            "DateTime": self.get_datetime()
+            "DateTime": self.get_datetime(),
+            "PartNumber": 'AutoPartNum'  # TODO read
             # ...
         })
 
@@ -62,13 +65,32 @@ class Atp(automation.TestDefinition):
         })
 
     def post_run(self, data: Data):
-        # Write the full test outcome to a .CSV file
-        
-        
-        
+        # Write the full test outcome to a .CSV file      
         part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "SerialNumber", "DateTime")
         filename = f"{part_number}_{serial_number}_{datetime}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
-        automation.CsvPublisher(self, Path(automation.locate_testroot(), "reports", 'RPi_' + fixture.get_rpi_serial(), filename)).generate()
+        ats_num = self.config[fixture.get_rpi_serial()]
+        automation.CsvPublisher(self, Path("/home/ttpi_xxx/ttatp_reports", ats_num, filename)).generate()
+        
+        # Look for USB drives and save data there if possible        
+        lsblk = os.popen('lsblk | grep sd | grep part').read().strip()  # find all USB drives
+        lsblk = lsblk.split('\n')
+        for i in lsblk:
+            if '/' in i:  # drive mounted
+                mount_path = re.search(r'.*part (\/.*)', i).group(1)
+                if 'atp_reports' in os.listdir(mount_path):  # find target folder, otherwise ignore                    
+                    automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()
+                    
+            else:  # drive not mounted
+                sd_name = re.search(r'(sd\S{2,5})', i).group(1)            
+                blkid = os.popen('sudo blkid | grep %s' % sd_name).read().strip()
+                uuid = re.search(r'UUID="(\S*)" BLOCK', blkid).group(1)
+                mount_path = os.path.join('/home/ttpi_xxx/media', uuid)
+                if uuid not in os.listdir('/home/ttpi_xxx/media'):
+                    os.mkdir(mount_path)
+                os.popen('sudo mount /dev/%s %s' % (sd_name, mount_path)).read()
+                if 'atp_reports' in os.listdir(mount_path): # find target folder, otherwise ignore      
+                    automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()              
+        
 
     def on_exit(self, data: Data):
         # Runs once just before the ATP unloads

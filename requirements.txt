@@ -1,2 +1,4 @@
 subinitial.automation @ git+https://subinitial@bitbucket.org/subinitial/subinitial-automation.git
 esptool
+pybase62
+blessed

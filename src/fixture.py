@@ -32,6 +32,8 @@ class Fixture:
     def get_rpi_serial(self):
         output = os.popen('cat /proc/cpuinfo | grep Serial').read()
         return re.search(r':\s(.{16})', output).group(1)
+    
+    
         
         
         

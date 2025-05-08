@@ -1,4 +1,40 @@
 # Trail Tracer Automated Test Procedure
+
+## TODO
+### Update from USB
+* on boot, look for USB drive
+    * check for folder
+    * check for git repo copy
+    * check for config file?
+    * pull from copy of git repo
+
+### atp.py
+#### Flow control
+* on boot, auto-start atp.py
+    * must use `sudo .venv/bin/python atp.py` to have use file write permissions and still use .venv interpreter
+    * add GPIO control for green button to start test
+        * dtoverlay for 'ENTER' key press might be good enough, will need to check behavior mid-test
+            * not great, holding button causes repeats and we really want edge only
+    * add GPIO to control green button light
+
+* handle various exceptions?
+
+#### Reports
+* pick folder naming convention
+    * Local disk can probably just be 'reports'
+    * USB drive/cloud folders must have serial no or UID
+
+#### Auto-backup
+    * switch to china-friendly cloud service
+    * auto-update script
+        * start on boot
+        * attempt upload on boot (as a simple force upload)
+        * attempt upload periodically in background
+            * cron?
+
+
+
+
 ## Setting Up a Fresh RPi5
 SSH into `ttpi_xxx@ttpi.loocal` the RPi and run the following commands:
 ```
@@ -7,6 +43,7 @@ sudo apt full-upgrade
 sudo reboot
 sudo apt install git
 git clone https://github.com/trtr6842-git/ttatp.git
+mkdir ttatp_reports
 cd ttatp
 python3 -m venv .venv
 source .venv/bin/activate
@@ -161,3 +198,68 @@ In Python:
 ```
 os.popen('cat /proc/cpuinfo | grep Serial').read()
 ```
+
+## Maybe hacky get STM32 UID
+STM32 value line IC's don't have a guranteed unique UID, but it may be good enough for our use on the Tx.
+On the STM32:
+```
+uint32_t uid[3];
+uid[0] = HAL_GetUIDw0();
+uid[1] = HAL_GetUIDw1();
+uid[2] = HAL_GetUIDw2();
+str_len = sprintf(pc_str, "UID: %lu%010lu%010lu\n\r", uid[0], uid[1], uid[2]);
+HAL_UART_Transmit(&huart1, (uint8_t*)pc_str, str_len, 100);
+```
+On the ESP32 we can get the 64-bit MAC address:
+```
+Serial.prinf("ESP MAC: %llu", ESP.getEfuseMac())
+```
+
+On the RPi after parsing for the decimal number we can shorten it by encoding it to base 62 [0-9, a-z, A-Z]
+```
+import base62
+base62.enocde(UID)
+```
+
+## Bind GPIO to key-press
+GPIO can be bound to key presses in the kernel  
+https://forums.raspberrypi.com/viewtopic.php?t=255659
+```
+sudo nano /boot/firmware/config.txt
+```
+Adda t bottom:
+```
+dtoverlay=gpio-key,gpio=3,keycode=28
+```
+
+## RCLONE setup Dropbox
+Use Rclone to automatically sync results files to a cloud service
+```
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
+rclone config
+```
+Follow the instructions here:  
+https://rclone.org/dropbox/
+
+entries used:
+```
+n/s/q>n
+name> ttatp_remote
+Storage> dropbox
+cliend_id>
+client_secret>
+Edit Advanced Config? y/n> n
+Use web browser...? y/n> n
+config_toekn> <token from rclone authorize "dropbox" on main machine>
+Keep this remote? y/e/d> y
+Quit config... > q
+```
+
+Usage:  
+https://rclone.org/commands/
+```
+rclone copy ~/ttatp_reports ttatp_remote:atp_reports --ignore-existing
+```
+
+## Change Terminal Font
+https://www.raspberrypi-spy.co.uk/2014/04/how-to-change-the-command-line-font-size/
