@@ -33,10 +33,24 @@
             * cron?
 
 
+## RPi CM5 Setup
+https://www.raspberrypi.com/documentation/computers/compute-module.html
+### Write SSD Image
+* open rpi-boot (program files (x86))  
+* Add jumper to "disable EMMC boot"  
+* Conenct 5V power leads to 40-pin GPIO pins p4 (+5V), p6 (GND)
+* Press and hold the power button while turning on 5V
+* Connect J11 USB-C to host computer
+* Wait for rpi-boot to do its thing, then RPi CM5 should show up as UB drive.  
+* run rpi-imager (program files (x86)) and write desired image
+* ? press and hold power button to power off?
+* Remove "disable EMMC boot jumper"
+* Add jumper to "disable writing to EEPROM"
+* Reboot
 
 
 ## Setting Up a Fresh RPi5
-SSH into `ttpi_xxx@ttpi.loocal` the RPi and run the following commands:
+SSH into `atp@atp.loocal` the RPi and run the following commands:
 ```
 sudo apt update
 sudo apt full-upgrade
@@ -44,11 +58,11 @@ sudo reboot
 sudo apt install git
 git clone https://github.com/trtr6842-git/ttatp.git
 mkdir ttatp_reports
+mkdir media
 cd ttatp
 python3 -m venv .venv
 source .venv/bin/activate
-pip install esptool
-pip install git+https://bitbucket.org/subinitial/subinitial-automation.git
+pip install -r requirements.txt
 deactivate
 cd ~
 ```
@@ -232,25 +246,34 @@ Adda t bottom:
 dtoverlay=gpio-key,gpio=3,keycode=28
 ```
 
-## RCLONE setup Dropbox
+## RCLONE setup OneDrive
 Use Rclone to automatically sync results files to a cloud service
 ```
 sudo -v ; curl https://rclone.org/install.sh | sudo bash
 rclone config
 ```
 Follow the instructions here:  
-https://rclone.org/dropbox/
+https://rclone.org/onedrive/
 
 entries used:
 ```
 n/s/q>n
 name> ttatp_remote
-Storage> dropbox
+Storage> onedrive
 cliend_id>
 client_secret>
+region> global
+tenant>
 Edit Advanced Config? y/n> n
 Use web browser...? y/n> n
-config_toekn> <token from rclone authorize "dropbox" on main machine>
+```
+On main PC, go to project stuff\RPi\rclone and open a terminal to run `"onedrive"`
+```
+config_toekn> <token from rclone authorize "onedrive" on main machine>
+config_type> onedrive
+config_driveid> <choose number for OneDrive (personal)>
+Found drive "root" of type...
+Y/n> y
 Keep this remote? y/e/d> y
 Quit config... > q
 ```
