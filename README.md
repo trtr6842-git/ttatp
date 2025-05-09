@@ -1,6 +1,6 @@
 # Trail Tracer Automated Test Procedure
 
-## TODO
+# TODO
 ### Update from USB
 * on boot, look for USB drive
     * check for folder
@@ -32,8 +32,11 @@
         * attempt upload periodically in background
             * cron?
 
+# Running ATP
+To run from terminal, must use `sudo .venv/bin/python atp.py` for proper usb permissions
 
-## RPi CM5 Setup
+
+# RPi CM5 Setup
 https://www.raspberrypi.com/documentation/computers/compute-module.html
 ### Write SSD Image
 * open rpi-boot (program files (x86))  

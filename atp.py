@@ -69,7 +69,7 @@ class Atp(automation.TestDefinition):
         part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "SerialNumber", "DateTime")
         filename = f"{part_number}_{serial_number}_{datetime}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
         ats_num = self.config[fixture.get_rpi_serial()]
-        automation.CsvPublisher(self, Path("/home/ttpi_xxx/ttatp_reports", ats_num, filename)).generate()
+        automation.CsvPublisher(self, Path("../ttatp_reports", ats_num, filename)).generate()
         
         # Look for USB drives and save data there if possible        
         lsblk = os.popen('lsblk | grep sd | grep part').read().strip()  # find all USB drives
@@ -84,8 +84,8 @@ class Atp(automation.TestDefinition):
                 sd_name = re.search(r'(sd\S{2,5})', i).group(1)            
                 blkid = os.popen('sudo blkid | grep %s' % sd_name).read().strip()
                 uuid = re.search(r'UUID="(\S*)" BLOCK', blkid).group(1)
-                mount_path = os.path.join('/home/ttpi_xxx/media', uuid)
-                if uuid not in os.listdir('/home/ttpi_xxx/media'):
+                mount_path = os.path.join('../media', uuid)
+                if uuid not in os.listdir('../media'):
                     os.mkdir(mount_path)
                 os.popen('sudo mount /dev/%s %s' % (sd_name, mount_path)).read()
                 if 'atp_reports' in os.listdir(mount_path): # find target folder, otherwise ignore      
