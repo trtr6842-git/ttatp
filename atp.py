@@ -31,8 +31,9 @@ class Atp(automation.TestDefinition):
         self.fields.add(
             automation.Field("TestVersion", default=self.version, is_static=True),
             automation.Field("PartNumber", default="[AUTOMATIC]", is_static=True),
-            automation.Field("SerialNumber", default=state.get("SerialNumber", ""), is_static=False),
+            automation.Field("STM32 UID", default="[AUTOMATIC]", is_static=False),
             automation.Field("DateTime", default="[AUTOMATIC]", is_static=True),
+            automation.Field("CpuTemp", default="[AUTOMATIC]", is_static=False)
             # ...
         )
         
@@ -54,7 +55,8 @@ class Atp(automation.TestDefinition):
         # Generate automatic fields
         self.fields.update_entries({
             "DateTime": self.get_datetime(),
-            "PartNumber": 'AutoPartNum'  # TODO read
+            "PartNumber": 'AutoPartNum',  # TODO read
+            "CpuTemp": fixture.get_rpi_cpu_temp()
             # ...
         })
 
@@ -84,7 +86,7 @@ class Atp(automation.TestDefinition):
                 sd_name = re.search(r'(sd\S{2,5})', i).group(1)            
                 blkid = os.popen('sudo blkid | grep %s' % sd_name).read().strip()
                 uuid = re.search(r'UUID="(\S*)" BLOCK', blkid).group(1)
-                mount_path = os.path.join('../media', uuid)
+                cd = os.path.join('../media', uuid)
                 if uuid not in os.listdir('../media'):
                     os.mkdir(mount_path)
                 os.popen('sudo mount /dev/%s %s' % (sd_name, mount_path)).read()

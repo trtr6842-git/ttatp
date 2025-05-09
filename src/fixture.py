@@ -33,6 +33,11 @@ class Fixture:
         output = os.popen('cat /proc/cpuinfo | grep Serial').read()
         return re.search(r':\s(.{16})', output).group(1)
     
+    def get_rpi_cpu_temp(self):
+        output = os.popen('vcgencmd measure_temp').read()
+        temp = re.search(r"temp=(\S*)'C", output).group(1)
+        return float(temp)
+    
     
         
         

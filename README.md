@@ -38,7 +38,7 @@ To run from terminal, must use `sudo .venv/bin/python atp.py` for proper usb per
 
 # RPi CM5 Setup
 https://www.raspberrypi.com/documentation/computers/compute-module.html
-### Write SSD Image
+## Write SSD Image
 * open rpi-boot (program files (x86))  
 * Add jumper to "disable EMMC boot"  
 * Conenct 5V power leads to 40-pin GPIO pins p4 (+5V), p6 (GND)
@@ -180,8 +180,9 @@ sudo nano /boot/firmware/config.txt
 ```
 Then at the end add:
 ```
-dtoverlay=uart1
 dtoverlay=uart2
+dtoverlay=uart3
+dtoverlay=uart4
 ```
 Must reboot to take effect.
 
@@ -216,6 +217,8 @@ In Python:
 os.popen('cat /proc/cpuinfo | grep Serial').read()
 ```
 
+Then add to `config.csv` along with appropriate RCTF_ATS###
+
 ## Maybe hacky get STM32 UID
 STM32 value line IC's don't have a guranteed unique UID, but it may be good enough for our use on the Tx.
 On the STM32:
@@ -238,7 +241,8 @@ import base62
 base62.enocde(UID)
 ```
 
-## Bind GPIO to key-press
+## GPIO dtoverlays
+### Bind to key press
 GPIO can be bound to key presses in the kernel  
 https://forums.raspberrypi.com/viewtopic.php?t=255659
 ```
@@ -248,6 +252,8 @@ Adda t bottom:
 ```
 dtoverlay=gpio-key,gpio=3,keycode=28
 ```
+
+### Redirect disk status LED
 
 ## RCLONE setup OneDrive
 Use Rclone to automatically sync results files to a cloud service
