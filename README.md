@@ -70,6 +70,23 @@ deactivate
 cd ~
 ```
 
+## CM5 Poweroff Hangups
+There are several issues that may cause a long pause when shutting down or rebooting, mostly due to the potential for missing WiFi or SD card detection when using certain CM5 configurations.
+
+Didn't work for me...
+https://forums.raspberrypi.com/viewtopic.php?t=383051
+
+Also didn't work, maybe firmware update via raspi-config isn't up to date?
+https://github.com/raspberrypi/linux/issues/6647
+
+### Hacky but practical fix:
+Use `sudo raspi-config` to change the boot order so NVMe is first (if being used).
+Then add a dummy blank SD card.  Can be used for backup storage too!
+
+
+
+
+
 ## RPi Connect
 ```
 cd ~
