@@ -52,6 +52,7 @@ https://www.raspberrypi.com/documentation/computers/compute-module.html
 * Reboot
 
 
+
 ## Setting Up a Fresh RPi5
 SSH into `atp@atp.loocal` the RPi and run the following commands:
 ```
@@ -69,6 +70,22 @@ pip install -r requirements.txt
 deactivate
 cd ~
 ```
+
+## Adding new ssh key to rpi
+On the computer you want to add, open a terminal and run
+```
+ssh-keygen -t rsa -b 4096 -C "TRPC25-RCTF_TT_ATS000"
+```
+where the quoted string after `-C` is a comment.  Hit enter three times to save the generated keys in the default location, which is usually \user\.ssh.
+
+Open the id_rsa.pub file, this has the public SSH key.
+Copy the public key and add it to `/.ssh/authroized_keys` on the rpi.  
+
+
+## Using winscp for file transfer
+Install and open winscp.  Create a new site using `atp@atp.local` as the hostname.  
+Click `addvanced` settings and go to `SSH -> authorization` and select your ssh private key.  You may need to convert it to .ppk format.  Save the session and login.
+
 
 ## CM5 Poweroff Hangups
 There are several issues that may cause a long pause when shutting down or rebooting, mostly due to the potential for missing WiFi or SD card detection when using certain CM5 configurations.
