@@ -52,6 +52,7 @@ https://www.raspberrypi.com/documentation/computers/compute-module.html
 * Reboot
 
 
+
 ## Setting Up a Fresh RPi5
 SSH into `atp@atp.loocal` the RPi and run the following commands:
 ```
