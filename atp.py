@@ -69,7 +69,8 @@ class Atp(automation.TestDefinition):
     def post_run(self, data: Data):
         # Write the full test outcome to a .CSV file      
         part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "SerialNumber", "DateTime")
-        filename = f"{part_number}_{serial_number}_{datetime}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
+        passfail = 'PASS' if self.result else 'FAIL'
+        filename = f"{part_number}_{serial_number}_{datetime}_{passfail}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
         ats_num = self.config[fixture.get_rpi_serial()]
         automation.CsvPublisher(self, Path("../ttatp_reports", ats_num, filename)).generate()
         
@@ -86,12 +87,13 @@ class Atp(automation.TestDefinition):
                 sd_name = re.search(r'(sd\S{2,5})', i).group(1)            
                 blkid = os.popen('sudo blkid | grep %s' % sd_name).read().strip()
                 uuid = re.search(r'UUID="(\S*)" BLOCK', blkid).group(1)
-                cd = os.path.join('../media', uuid)
+                mount_path = os.path.join('../media', uuid)
                 if uuid not in os.listdir('../media'):
                     os.mkdir(mount_path)
                 os.popen('sudo mount /dev/%s %s' % (sd_name, mount_path)).read()
                 if 'atp_reports' in os.listdir(mount_path): # find target folder, otherwise ignore      
-                    automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()              
+                    automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()   
+        print(self.result)
         
 
     def on_exit(self, data: Data):
@@ -101,4 +103,5 @@ class Atp(automation.TestDefinition):
 
 # Entry point
 if __name__ == "__main__":
-    atp = Atp().start()
+    atp = Atp().start(autorun=False)
+    # print(atp)

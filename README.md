@@ -84,9 +84,6 @@ Use `sudo raspi-config` to change the boot order so NVMe is first (if being used
 Then add a dummy blank SD card.  Can be used for backup storage too!
 
 
-
-
-
 ## RPi Connect
 ```
 cd ~
