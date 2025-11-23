@@ -110,7 +110,7 @@ loginctl enable-linger
 rpi-connect signin
 ```
 
-## Remote code development vis VS Code
+## Remote code development via VS Code
 On remote development machine, open VS Code and install the 'Remote Development' Extension.
 Use `CTR + SHIFT + P` and search for `Remotre SSH: COnnect current window to host`
 
