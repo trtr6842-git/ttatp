@@ -81,6 +81,28 @@ where the quoted string after `-C` is a comment.  Hit enter three times to save 
 Open the id_rsa.pub file, this has the public SSH key.
 Copy the public key and add it to `/.ssh/authroized_keys` on the rpi.  
 
+## SSD Setup
+### Cloning the SD card to SSD
+```
+git clone https://github.com/geerlingguy/rpi-clone.git
+cd rpi-clone
+sudo cp rpi-clone rpi-clone-setup /usr/local/sbin/
+```
+Then run `lsblk` to check that the SSD is named `nvme0n1` and it should have no partitions.  If so, run:
+```
+sudo rpi-clone nvme0n1
+```
+Type `yes` once and just hit enter to skip the optional file system label, hit enter to unmount and finish.  `lsblk` should show a partitioned drive.
+
+If there was a failed write, use this to clean up any nvme partitions:
+```
+sudo wipefs -a /dev/nvme0n1
+```
+
+### Changing the boot order
+run `sudo raspi-config` → Advanced Options → Boot Order → NVMe/USB Boot
+Don't reboot, instead `sudo poweroff`, remove the SD card, then reboot.
+
 
 ## Using winscp for file transfer
 Install and open winscp.  Create a new site using `atp@atp.local` as the hostname.  
@@ -237,6 +259,45 @@ make
 sudo make install
 cd ~/ttatp
 stm32flash -b 230400 -w ~/ttatp/tx/stm32/RCTF_WFTX_REVA_STM32G030C8T6.bin /dev/ttyAMA3
+```
+
+The STM32's come with the factory ROM bootloader.  This will be active if the word at the start address is blank (0xFFFFFFFF).  A basic (and not foolproof) strategy to minimize bricking risk is to write everything else first and save that word for last.  This can be done by splitting the .bin file into the first 4 bytes, then everything else:
+```
+stm32flash -w main.bin -S 0x08000004 /dev/ttyUSB0
+stm32flash -w vector.bin -S 0x08000000 /dev/ttyUSB0
+```
+
+This can be done from the base .bin file in python:
+```
+## UNTESTED CHATGPT SCRIPT
+import subprocess
+import sys
+from pathlib import Path
+
+PORT = "/dev/ttyAMA3"
+BINFILE = Path("firmware.bin")
+
+# --- split file, will overwrite without complaints ---
+data = BINFILE.read_bytes()
+vector = data[:4]
+main = data[4:]
+
+Path("vector.bin").write_bytes(vector)  # first word
+Path("main.bin").write_bytes(main)  # bulk program
+
+# --- helper to run stm32flash ---
+def run(cmd):
+    print(" ".join(cmd))
+    res = subprocess.run(cmd)  # forwards terminal output by default
+    # res = subprocess.run(cmd, stdout=subprocess.DEVNULL)  # Ignore non error output
+    if res.returncode != 0:
+        sys.exit(f"Failed: {' '.join(cmd)}")
+
+# --- program main then vector ---
+run(["stm32flash", "-w", "main.bin", "-v", "-S", "0x08000004", PORT])
+run(["stm32flash", "-w", "vector.bin", "-v", "-S", "0x08000000", PORT])
+
+print("Programming complete.")
 ```
 
 ## Get RPi serial number
