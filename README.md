@@ -242,6 +242,9 @@ Must reboot to take effect.
 #### Serial Monitor
 `python -m serial.tools.miniterm /dev/ttyAMA3 115200`
 
+For 1Mbaud STM32 on UART2:
+`python -m serial.tools.miniterm /dev/ttyAMA2 1000000`
+
 #### 40-pin header UARTS:
 |/dev/tty* |UART#  |Tx/Rx Pins|GPIO Pins   |
 |:--------:|:-----:|:--------:|:----------:|
@@ -299,6 +302,9 @@ run(["stm32flash", "-w", "vector.bin", "-v", "-S", "0x08000000", PORT])
 
 print("Programming complete.")
 ```
+
+### RCTF TT Tx Bootcheker
+The Tx has a bootchecker that looks if either MOBO DOUT_2 (Tx TEST_IN_2/PB4) is low or both buttons are pressed during the entire boot LED sequence.  If no bootload trigger is detected, then the main program runs.  If a boot trigger is detected, it jumps to the factory bootloader.  
 
 ## Get RPi serial number
 ```

@@ -28,3 +28,5 @@ class MockVisaDMM:
         if self._host is None:
             raise Exception("MockVisaDMM is not yet connected!")
         return random.random() * 10
+    
+

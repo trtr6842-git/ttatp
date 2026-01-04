@@ -1,0 +1,46 @@
+﻿TestReport
+
+TestVersion,v0.1.0
+PartNumber,RCTF-TT-TX-REVA
+STM32 UID,[AUTOMATIC]
+DateTime,26-01-03_23-12-55
+CpuTemp,45.0
+Duration,5.922,s
+
+10,TESTS PASSED
+0,TESTS FAILED
+0,ASSERTIONS FAILED
+
+TID:A#,Test Steps / Assertions,Criteria,Min,Measurement,Max,Units,Result,Step-Time,Procedure-Time,Notes
+1,DUT Detection,,,,,,PASS,0.209,0.185,
+1::1,DUT 5V Sense,Min < x,0.25,0.36724839359521866,,V,PASS
+2,DUT Power Up Erase,,,,,,PASS,0.697,0.628,
+2::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.002500057220459,5.2,V,PASS
+2::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.5,A,PASS
+2::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.704942941665649,5.2,V,PASS
+2::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2564696073532104,3.6,V,PASS
+3,Erase All,,,,,,PASS,0.054,0.054,
+3::1,Erase Success,x is True,,True,,,PASS
+4,DUT Power Up Flash Main,,,,,,PASS,2.838,0.628,
+4::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.002500057220459,5.2,V,PASS
+4::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.5,A,PASS
+4::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.706048011779785,5.2,V,PASS
+4::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2564785480499268,3.6,V,PASS
+5,Flash Main,,,,,,PASS,2.196,2.196,
+5::1,Flash Main,x is True,,True,,,PASS
+6,DUT Power Up Flash Boot,,,,,,PASS,1.039,0.628,
+6::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.006249904632568,5.2,V,PASS
+6::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.5,A,PASS
+6::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.708666563034058,5.2,V,PASS
+6::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.25648033618927,3.6,V,PASS
+7,Flash Bootchecker,,,,,,PASS,0.396,0.396,
+7::1,Flash Bootchecker,x is True,,True,,,PASS
+8,Connect to DUT,,,,,,PASS,1.139,0.0,
+9,DUT Power Up Functional Test,,,,,,PASS,1.139,0.328,
+9::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.006249904632568,5.2,V,PASS
+9::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.005649999715387821,0.5,A,PASS
+9::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.707586169242859,5.2,V,PASS
+9::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.256560802459717,3.6,V,PASS
+10,Read UID,,,,,,PASS,0.796,0.796,
+10::1,UID,Record,,000275263908758438510909128756,,,
+10::2,UID Found,x is True,,True,,,PASS

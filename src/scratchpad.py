@@ -1,6 +1,7 @@
 #! .env/bin/python3
 
 import subinitial.automation as automation
+import time
 
 testroot = automation.locate_testroot()
 testroot.insert_path()  # insert testroot into sys.path for consistent file imports!
@@ -10,12 +11,14 @@ from src.connections import connection_manager
 
 
 def main():
-    something_hacky()
+    fixture.stm.connect()
+    fixture.stm.set_lcd_text('Scratchpad')
+    fixture.stm.set_lcd_text('', 1)
+    fixture.stm.set_dout_state(2, 1)
+    fixture.stm.set_vdut(0)           
+    time.sleep(0.5)
+    fixture.stm.set_vdut(5)
 
-
-def something_hacky():
-    connection_manager.connect()
-    print(f"DMM Measured {dmm.measure_voltage()}V")
 
 
 if __name__ == "__main__":

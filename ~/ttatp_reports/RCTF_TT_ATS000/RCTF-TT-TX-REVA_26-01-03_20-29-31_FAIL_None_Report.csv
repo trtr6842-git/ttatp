@@ -1,0 +1,26 @@
+﻿TestReport
+
+TestVersion,v0.1.0
+PartNumber,RCTF-TT-TX-REVA
+STM32 UID,[AUTOMATIC]
+DateTime,26-01-03_20-29-31
+CpuTemp,45.0
+Duration,1.634,s
+
+2,TESTS PASSED
+1,TESTS FAILED
+1,ASSERTIONS FAILED
+
+TID:A#,Test Steps / Assertions,Criteria,Min,Measurement,Max,Units,Result,Step-Time,Procedure-Time,Notes
+1,DUT Detection,,,,,,PASS,0.21,0.186,
+1::1,DUT 5V Sense,Min < x,0.25,0.3633529767394066,,V,PASS
+2,DUT Power Up,,,,,,EXIT,1.424,0.328,
+2::1,Measured Vdut,Min ≤ x ≤ Max,4.8,4.99875020980835,5.2,V,PASS
+2::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006099999882280827,0.05,A,PASS
+2::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.695147514343262,5.2,V,PASS
+2::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.255202531814575,3.6,V,PASS
+3,Erase STM32,,,,,,PASS,0.029,0.029,
+3::1,Erase Success,x is True,,True,,,PASS
+4,Flash Bootchecker,,,,,,FAIL,1.052,1.052,
+4::1,Bootchecker body flash,x is True,,False,,,FAIL
+5,Flash Bootchecker,,,,,,-,0,-,

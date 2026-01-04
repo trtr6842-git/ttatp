@@ -1,0 +1,16 @@
+﻿TestReport
+
+TestVersion,v0.1.0
+PartNumber,RCTF-TT-TX-REVA
+STM32 UID,[AUTOMATIC]
+DateTime,26-01-03_15-35-07
+CpuTemp,47.7
+Duration,0.183,s
+
+1,TESTS PASSED
+0,TESTS FAILED
+0,ASSERTIONS FAILED
+
+TID:A#,Test Steps / Assertions,Criteria,Min,Measurement,Max,Units,Result,Step-Time,Procedure-Time,Notes
+1,DUT Detection,,,,,,PASS,0.183,0.159,
+1::1,DUT 5V Sense,Min < x,0.25,0.36964602023363113,,,PASS

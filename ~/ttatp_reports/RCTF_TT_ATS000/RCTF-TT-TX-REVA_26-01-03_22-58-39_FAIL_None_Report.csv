@@ -1,0 +1,46 @@
+﻿TestReport
+
+TestVersion,v0.1.0
+PartNumber,RCTF-TT-TX-REVA
+STM32 UID,[AUTOMATIC]
+DateTime,26-01-03_22-58-39
+CpuTemp,45.5
+Duration,7.369,s
+
+7,TESTS PASSED
+1,TESTS FAILED
+1,ASSERTIONS FAILED
+
+TID:A#,Test Steps / Assertions,Criteria,Min,Measurement,Max,Units,Result,Step-Time,Procedure-Time,Notes
+1,DUT Detection,,,,,,PASS,0.209,0.185,
+1::1,DUT 5V Sense,Min < x,0.25,0.36759960651397705,,V,PASS
+2,DUT Power Up Erase,,,,,,PASS,0.696,0.628,
+2::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.002500057220459,5.2,V,PASS
+2::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006099999882280827,0.5,A,PASS
+2::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.7048327922821045,5.2,V,PASS
+2::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.256585121154785,3.6,V,PASS
+3,Erase All,,,,,,PASS,0.053,0.053,
+3::1,Erase Success,x is True,,True,,,PASS
+4,DUT Power Up Flash Main,,,,,,PASS,4.061,0.628,
+4::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.002500057220459,5.2,V,PASS
+4::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.5,A,PASS
+4::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.7061134576797485,5.2,V,PASS
+4::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2565758228302,3.6,V,PASS
+5,Flash Main,,,,,,PASS,3.418,3.418,
+5::1,Flash Main,x is True,,True,,,PASS
+6,DUT Power Up Flash Boot,,,,,,PASS,1.039,0.628,
+6::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.006249904632568,5.2,V,PASS
+6::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.5,A,PASS
+6::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.709910035133362,5.2,V,PASS
+6::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.256640911102295,3.6,V,PASS
+7,Flash Bootchecker,,,,,,PASS,0.396,0.396,
+7::1,Flash Bootchecker,x is True,,True,,,PASS
+8,Connect to DUT,,,,,,EXIT,1.364,0.0,
+9,DUT Power Up Functional Test,,,,,,EXIT,1.363,0.327,
+9::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.006249904632568,5.2,V,PASS
+9::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.005649999715387821,0.5,A,PASS
+9::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.708562135696411,5.2,V,PASS
+9::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2565908432006836,3.6,V,PASS
+10,Read UID,,,,,,FAIL,1.02,1.02,
+10::1,UID,Record,,,,,
+10::2,UID Found,x is True,,False,,,FAIL

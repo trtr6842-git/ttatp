@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Atp(automation.TestDefinition):
     def init(self):
-        self.title = "ATP Template"
+        self.title = "RCTF TRAIL TRACER ATP"
         # ATP version/revision, displaying in TestCenter and generated SiSteps docs
         self.version = "v{major}.{minor}.{patch}".format(major=0, minor=1, patch=0)
         
@@ -30,49 +30,71 @@ class Atp(automation.TestDefinition):
         # Define the fields (user and automatic input to a test run)
         self.fields.add(
             automation.Field("TestVersion", default=self.version, is_static=True),
-            automation.Field("PartNumber", default="[AUTOMATIC]", is_static=True),
-            automation.Field("STM32 UID", default="[AUTOMATIC]", is_static=False),
+            automation.Field("PartNumber", default="RCTF-TT-TX-REVA", is_static=True),
+            automation.Field("STM32 UID", default="[AUTOMATIC]", is_static=True),
             automation.Field("DateTime", default="[AUTOMATIC]", is_static=True),
-            automation.Field("CpuTemp", default="[AUTOMATIC]", is_static=False)
+            automation.Field("CpuTemp", default="[AUTOMATIC]", is_static=True)
             # ...
         )
         
         # Define the test tree
         self.steps.add(
-            TemplateStep(title='Template Step'),
-            TemplateStep(title='Template Step: This One Might Fail'),
-            TemplateStep(title='Template Step: This One Will Fail', try_count=0),
-            # ...
+            DutDetect(title='DUT Detection', skip=False),
+            PowerUp(title='DUT Power Up Erase', skip=False, imax=0.05, boot=True)(
+                EraseAll(title='Erase All')
+            ),
+            PowerUp(title='DUT Power Up Flash Main', skip=False, boot=True)(
+                FlashMain(title='Flash Main')
+            ),
+            PowerUp(title='DUT Power Up Flash Boot', skip=False, boot=True)(
+                FlashBootchecker(title='Flash Bootchecker')
+            ),
+            ConnectDutUart(title='Connect to DUT')(
+                PowerUp(title='DUT Power Up Functional Test', skip=False, imax=0.5)(
+                    GetUid(title='Read UID')
+                )
+            )
+
         )
 
     def connect(self, data: Data):
+        fixture.stm.connect()
         return connection_manager.connect()
+        
 
     def disconnect(self, data: Data):
+        fixture.stm.disconnect
         return connection_manager.disconnect()
 
     def pre_run(self, data: Data):
         # Generate automatic fields
+        fixture.stm.set_rgb_str('#FFFF00')
+        fixture.stm.set_lcd_text('TESTING...')
+        fixture.stm.set_lcd_text('', 1)
         self.fields.update_entries({
             "DateTime": self.get_datetime(),
-            "PartNumber": 'AutoPartNum',  # TODO read
+            # "PartNumber": 'AutoPartNum',  # TODO read
             "CpuTemp": fixture.get_rpi_cpu_temp()
-            # ...
         })
 
         # Save state.json for next time the test is run.
         state.update({
-            "SerialNumber": self.fields.get_entry("SerialNumber"),
+            "SerialNumber": self.fields.get_entry("STM32 UID"),
             # ...
         })
+        fixture.dut_uid = None
 
     def post_run(self, data: Data):
+        self.fields.update_entries({
+            "STM32 UID": fixture.dut_uid
+        })
         # Write the full test outcome to a .CSV file      
-        part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "SerialNumber", "DateTime")
+        part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "STM32 UID", "DateTime")
         passfail = 'PASS' if self.result else 'FAIL'
-        filename = f"{part_number}_{serial_number}_{datetime}_{passfail}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
+        filename = f"{part_number}_{passfail}_{datetime}_{serial_number}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
         ats_num = self.config[fixture.get_rpi_serial()]
-        automation.CsvPublisher(self, Path("../ttatp_reports", ats_num, filename)).generate()
+        automation.CsvPublisher(self, Path("~/ttatp_reports", ats_num, filename)).generate()
+        # print(self.result)
         
         # Look for USB drives and save data there if possible        
         lsblk = os.popen('lsblk | grep sd | grep part').read().strip()  # find all USB drives
@@ -83,7 +105,7 @@ class Atp(automation.TestDefinition):
                 if 'atp_reports' in os.listdir(mount_path):  # find target folder, otherwise ignore                    
                     automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()
                     
-            else:  # drive not mounted
+            elif i != '':  # drive not mounted
                 sd_name = re.search(r'(sd\S{2,5})', i).group(1)            
                 blkid = os.popen('sudo blkid | grep %s' % sd_name).read().strip()
                 uuid = re.search(r'UUID="(\S*)" BLOCK', blkid).group(1)
@@ -93,7 +115,14 @@ class Atp(automation.TestDefinition):
                 os.popen('sudo mount /dev/%s %s' % (sd_name, mount_path)).read()
                 if 'atp_reports' in os.listdir(mount_path): # find target folder, otherwise ignore      
                     automation.CsvPublisher(self, Path(mount_path, 'atp_reports', ats_num, filename)).generate()   
-        print(self.result)
+
+        if self.result:
+            fixture.stm.set_rgb_str('#00FF00')
+            fixture.stm.set_lcd_text('PASS')
+            fixture.stm.set_lcd_text('', 1)
+        else:
+            fixture.stm.set_rgb_str('#FF0000')
+            fixture.stm.set_lcd_text('!! FAIL !!')
         
 
     def on_exit(self, data: Data):

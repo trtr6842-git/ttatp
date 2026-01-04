@@ -2,3 +2,5 @@ subinitial.automation @ git+https://subinitial@bitbucket.org/subinitial/subiniti
 esptool
 pybase62
 blessed
+pyserial
+numpy

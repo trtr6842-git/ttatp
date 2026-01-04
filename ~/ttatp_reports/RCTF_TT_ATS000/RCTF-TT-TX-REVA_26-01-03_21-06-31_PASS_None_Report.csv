@@ -1,0 +1,42 @@
+﻿TestReport
+
+TestVersion,v0.1.0
+PartNumber,RCTF-TT-TX-REVA
+STM32 UID,[AUTOMATIC]
+DateTime,26-01-03_21-06-31
+CpuTemp,44.4
+Duration,26.683,s
+
+8,TESTS PASSED
+0,TESTS FAILED
+0,ASSERTIONS FAILED
+
+TID:A#,Test Steps / Assertions,Criteria,Min,Measurement,Max,Units,Result,Step-Time,Procedure-Time,Notes
+1,DUT Detection,,,,,,PASS,0.21,0.186,
+1::1,DUT 5V Sense,Min < x,0.25,0.3630165383219719,,V,PASS
+2,DUT Power Up 1,,,,,,PASS,0.472,0.428,
+2::1,Measured Vdut,Min ≤ x ≤ Max,4.8,4.99875020980835,5.2,V,PASS
+2::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006099999882280827,0.05,A,PASS
+2::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.694912552833557,5.2,V,PASS
+2::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2552311420440674,3.6,V,PASS
+3,Erase All,,,,,,PASS,0.029,0.029,
+3::1,Erase Success,x is True,,True,,,PASS
+4,DUT Power Up 2,,,,,,PASS,24.708,0.428,
+4::1,Measured Vdut,Min ≤ x ≤ Max,4.8,4.99875020980835,5.2,V,PASS
+4::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006149999797344208,0.05,A,PASS
+4::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.695868492126465,5.2,V,PASS
+4::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.255288004875183,3.6,V,PASS
+5,Flash Main,,,,,,PASS,24.265,24.265,
+5::1,Flash Main,x is True,,True,,,PASS
+6,DUT Power Up 3,,,,,,PASS,0.84,0.428,
+6::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.005000114440918,5.2,V,PASS
+6::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006199999712407589,0.05,A,PASS
+6::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.704129338264465,5.2,V,PASS
+6::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.2554153203964233,3.6,V,PASS
+7,Flash Bootchecker,,,,,,PASS,0.397,0.397,
+7::1,Flash Bootchecker,x is True,,True,,,PASS
+8,DUT Power Up 4,,,,,,PASS,0.452,0.428,
+8::1,Measured Vdut,Min ≤ x ≤ Max,4.8,5.006249904632568,5.2,V,PASS
+8::2,Measured Idut,Min ≤ x ≤ Max,0.001,0.006199999712407589,0.05,A,PASS
+8::3,DUT 5V,Min ≤ x ≤ Max,4.2,4.703647613525391,5.2,V,PASS
+8::4,DUT 3V3,Min ≤ x ≤ Max,3.0,3.255309820175171,3.6,V,PASS
