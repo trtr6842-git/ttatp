@@ -4,3 +4,4 @@ pybase62
 blessed
 pyserial
 numpy
+scipy

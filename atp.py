@@ -23,7 +23,7 @@ class Atp(automation.TestDefinition):
             data.variable = 'test run scoped variable here'
 
             # You can also set Step parameters for the top-level step here
-            data.step_is_resilient = True # Tells automation to still try following steps if one fails, unless it was as requiremnt
+            data.step_is_resilient = False # Tells automation to still try following steps if one fails, unless it was as requiremnt
 
 
     def define_test(self, data: Data):
@@ -40,18 +40,20 @@ class Atp(automation.TestDefinition):
         # Define the test tree
         self.steps.add(
             DutDetect(title='DUT Detection', skip=False),
-            PowerUp(title='DUT Power Up Erase', skip=False, imax=0.05, boot=True)(
+            PowerUp(title='DUT Power Up Erase', imax=0.05, boot=True, skip=False,)(
                 EraseAll(title='Erase All')
             ),
-            PowerUp(title='DUT Power Up Flash Main', skip=False, boot=True)(
+            PowerUp(title='DUT Power Up Flash Main', boot=True, skip=False, step_retry=2)(
                 FlashMain(title='Flash Main')
             ),
-            PowerUp(title='DUT Power Up Flash Boot', skip=False, boot=True)(
+            PowerUp(title='DUT Power Up Flash Boot', boot=True, skip=False)(
                 FlashBootchecker(title='Flash Bootchecker')
             ),
             ConnectDutUart(title='Connect to DUT')(
-                PowerUp(title='DUT Power Up Functional Test', skip=False, imax=0.5)(
-                    GetUid(title='Read UID')
+                PowerUp(title='DUT Power Up Functional Test', imax=0.5, lcd='Functional Test', skip=False)(
+                    GetUid(title='Read UID', skip=False),
+                    MeasureResonance(title='Measure Resonance', skip=False),
+                    AutoTune(title='Auto Tune')
                 )
             )
 
@@ -119,9 +121,10 @@ class Atp(automation.TestDefinition):
         if self.result:
             fixture.stm.set_rgb_str('#00FF00')
             fixture.stm.set_lcd_text('PASS')
-            fixture.stm.set_lcd_text('', 1)
+            self.run_time
+            fixture.stm.set_lcd_text('%.1fs' % (self.run_time), 1)
         else:
-            fixture.stm.set_rgb_str('#FF0000')
+            fixture.stm.set_rgb_str("#D30000")
             fixture.stm.set_lcd_text('!! FAIL !!')
         
 
@@ -132,5 +135,5 @@ class Atp(automation.TestDefinition):
 
 # Entry point
 if __name__ == "__main__":
-    atp = Atp().start(autorun=False)
+    atp = Atp().start(autorun=True)
     # print(atp)

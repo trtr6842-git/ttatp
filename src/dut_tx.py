@@ -41,7 +41,6 @@ class DutTx:
     
 
     def _write_u32(self, cmd:int, val:int):
-        cmd = cmd | 0x80000000
         tx_bytes = struct.pack('<II', cmd, val)
         self.ser.write(tx_bytes)
         self.ser.flush()
@@ -49,8 +48,16 @@ class DutTx:
         rx = self._read_n_bytes(len(tx_bytes))
         return struct.unpack('<II', rx)[1]
     
+
+    def _write_u16_list(self, cmd:int, vals:list[int]):
+        tx_bytes = struct.pack('<I2H', cmd, *vals)
+        self.ser.write(tx_bytes)
+        self.ser.flush()
+
+        rx = self._read_n_bytes(len(tx_bytes))
+        return struct.unpack('<I2H', rx)[-2:]
+    
     def _write_u8_list(self, cmd:int, vals:list[int]):
-        cmd = cmd | 0x80000000
         tx_bytes = struct.pack('<I4B', cmd, *vals)
         self.ser.write(tx_bytes)
         self.ser.flush()
@@ -58,16 +65,7 @@ class DutTx:
         rx = self._read_n_bytes(len(tx_bytes))
         return struct.unpack('<I4B', rx)[-4:]
     
-    def _read_u32(self, cmd:int):
-        tx_bytes = struct.pack('<II', cmd, 0)
-        self.ser.write(tx_bytes)
-        self.ser.flush()
-
-        rx = self._read_n_bytes(len(tx_bytes))
-        return struct.unpack('<II', rx)[1]
-    
     def _write_f32(self, cmd:int, val:float):
-        cmd = cmd | 0x80000000
         tx_bytes = struct.pack('<If', cmd, val)
         self.ser.write(tx_bytes)
         self.ser.flush()
@@ -75,13 +73,26 @@ class DutTx:
         rx = self._read_n_bytes(len(tx_bytes))
         return struct.unpack('<If', rx)[1]
     
-    def _read_f32(self, cmd:int):
-        tx_bytes = struct.pack('<If', cmd, 0)
-        self.ser.write(tx_bytes)
-        self.ser.flush()
+    def set_pwm_state(self, state):
+        if state:
+            return self._write_u32(2, 1)
+        else:
+            return self._write_u32(2, 0)
+        
+    def set_pwm_per_ccr(self, per, ccr):
+        return self._write_u16_list(1, [per, ccr])
+    
+    def set_tuning(self, tuning):
+        return self._write_u32(3, tuning)
+    
+    def get_isense(self):
+        return self._write_f32(4, 0)
+    
+    def set_auto_state(self, state):
+        return self._write_u32(5, state)
 
-        rx = self._read_n_bytes(len(tx_bytes))
-        return struct.unpack('<If', rx)[1]
+    
+
     
     
         
