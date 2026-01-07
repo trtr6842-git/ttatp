@@ -90,6 +90,12 @@ class DutTx:
     
     def set_auto_state(self, state):
         return self._write_u32(5, state)
+    
+    def set_factory_test_state(self, state):
+        if state:
+            return self._write_u32(0x54455354, 0x50415353)
+        else:
+            return self._write_u32(0x54455354, 0x4641494C)
 
     
 

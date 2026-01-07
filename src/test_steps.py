@@ -113,7 +113,7 @@ class PowerUp(automation.Step):
     
     def teardown(self, data: Data):
         fixture.stm.set_vdut(0)
-        time.sleep(0.2)
+        time.sleep(0.3)
 
 
 
@@ -122,8 +122,10 @@ class EraseAll(automation.Step):
         def __init__(data):
             # Measurements
             data.erase_result: bool = None
+            data.retry_attemped: bool = False
     
     def criteria(self, data: Data):
+        self.assert_record('Retry Attemped', data.retry_attemped)
         self.assert_true('Erase Success', data.erase_result)
 
     def procedure(self, data: Data):
@@ -135,6 +137,19 @@ class EraseAll(automation.Step):
         else:
             data.erase_result = False
 
+        if data.erase_result is False:
+            self.report_info('Retrying...')
+            data.retry_attemped = True
+            fixture.stm.set_vdut(0)
+            fixture.stm.set_lcd_text('Flash Erase 2', 1)
+            time.sleep(0.5)
+            fixture.stm.set_vdut(5.0)
+            res = fixture.run_rpi(["stm32flash", "-o", PORT])
+            if res.returncode == 0:
+                data.erase_result = True
+            else:
+                data.erase_result = False
+
 
 class FlashMain(automation.Step):
     class Data:
@@ -144,8 +159,10 @@ class FlashMain(automation.Step):
 
             # Measurements
             data.flash_result: bool = None
+            data.retry_attemped: bool = False
     
     def criteria(self, data: Data):
+        self.assert_record('Retry Attemped', data.retry_attemped)
         self.assert_true('Flash Main', data.flash_result)
 
     def procedure(self, data: Data):
@@ -157,6 +174,20 @@ class FlashMain(automation.Step):
             data.flash_result = True
         else:
             data.flash_result = False
+
+        if data.flash_result is False:
+            self.report_info('Retrying...')
+            data.retry_attemped = True
+            fixture.stm.set_vdut(0)
+            fixture.stm.set_lcd_text('Flash Main Retry', 1)
+            time.sleep(0.5)
+            fixture.stm.set_vdut(5.0)
+            res = fixture.run_rpi(["stm32flash", "-b", "230400", "-w", data.bin_path, "-v", "-S", "0x08000800", PORT])
+            if res.returncode == 0:
+                data.flash_result = True
+            else:
+                data.flash_result = False
+
 
 
 class FlashBootchecker(automation.Step):
@@ -180,6 +211,7 @@ class FlashBootchecker(automation.Step):
             data.flash_result = True
         else:
             data.flash_result = False
+            fixture.stm.set_lcd_text('Manual Erase Req', 1)
 
 
 class ConnectDutUart(automation.Step):
@@ -224,8 +256,7 @@ class GetUid(automation.Step):
     
         if match:
             data.uid = match.group(1)  # Return the UID value
-            fixture.dut_uid = data.uid
-            
+            fixture.dut_uid = data.uid            
 
     def teardown(self, data: Data):
         pass
@@ -240,8 +271,8 @@ class MeasureResonance(automation.Step):
             data.l_configs = [0b0111, 0b1011, 0b1101, 0b1110]
 
             data.lval_titles = ['L4 220uH', 'L3 100uH', 'L2 47uH', 'L1 22uH']
-            data.lmins = [170e-6, 75e-6, 35e-6, 15e-6]
-            data.lmaxs = [270e-6, 125e-6, 60e-6, 30e-6]
+            data.lmins = [175e-6, 80e-6, 35e-6, 15e-6]
+            data.lmaxs = [265e-6, 120e-6, 60e-6, 30e-6]
 
             data.kmins = [0.192, 0.244, 0.276, 0.286, 0.298]
             data.kmaxs = [0.282, 0.334, 0.366, 0.376, 0.388]
@@ -337,10 +368,10 @@ class MeasureResonance(automation.Step):
                     adc = fixture.stm.measure_adc_hs()
                     if ft == data.f_centers[i]:
                         v5v, v3v3 = fixture.measure_tx_5v_3v3()
-                        data.v5vs[i] = v5v
-                        data.v3v3s[i] = v3v3
-                        data.vduts[i] = fixture.stm.measure_vdut()
-                        data.iduts[i] = fixture.stm.measure_idut()
+                        data.v5vs[i] = float(v5v)
+                        data.v3v3s[i] = float(v3v3)
+                        data.vduts[i] = float(fixture.stm.measure_vdut())
+                        data.iduts[i] = float(fixture.stm.measure_idut())
 
                     iout = adc[0,:]
                     dut_isense = fixture.dut.get_isense()
@@ -356,25 +387,30 @@ class MeasureResonance(automation.Step):
                 fixture.dut.set_pwm_state(0)
                 f0, K, pk_idx = fixture.estimate_peak(fs, ipts)
                 data.ltunes[i] = float((2 * np.pi * f0)**(-2) / data.cres - data.lfix)
-                data.ktunes[i] = K
+                data.ktunes[i] = float(K)
                 self.assert_record(cfg_title+' F0', f0, units='Hz')
                 self.assert_record(cfg_title+' Ipeak', K, units='A RMS')
                 self.assert_record(cfg_title, '%.2f' % (data.ltunes[i]*1e6), units='uH')
 
             # Add LCD message catching any incorrect Inductor Values
             anyfail = False
+            anypass = False
             failmsg = ''
             for i in range(len(data.f_centers)):
-                if data.lmins[i] <= data.ltunes[i] <= data.lmaxs[i]:
-                    pass
+                if (data.lmins[i] <= data.ltunes[i] <= data.lmaxs[i]) and data.kmins[i] <= data.ktunes[i] <= data.kmaxs[i]:
+                    anypass = True
                 else:
                     anyfail = True
                     failmsg += 'L%d ' % (4 - i)
 
-            if anyfail:
+            if anypass and anyfail:
                 fixture.stm.set_lcd_text(failmsg, 1)
+            elif anypass is False:
+                fixture.stm.set_lcd_text('All Ls or Other', 1)
 
-
+    def teardown(self, data):
+        if self.result is False:
+            fixture.dut.set_factory_test_state(False)
 
 
 class AutoTune(automation.Step):
@@ -457,6 +493,39 @@ class AutoTune(automation.Step):
         data.dft = np.abs(iout_fft[int(ft/freqs[1])])
 
         fixture.dut.set_auto_state(0)
+
+    def teardown(self, data):
+        if self.result is False:
+            fixture.dut.set_factory_test_state(False)
+
+
+
+class WritePass(automation.Step):
+    class Data:
+        def __init__(data, any_fail='not_assigned'):
+            data.any_fail = any_fail
+            data.accepted: bool = False
+            data.response:int = None
+            data.expected_response:int = None
+    
+    def criteria(self, data: Data):
+        self.assert_record('Any Failures', data.any_fail)
+        self.assert_record('Response', data.response)
+        self.assert_true('NVM Written', data.accepted)
+
+    def procedure(self, data: Data):   
+        # print(data.any_fail, type(data.any_fail))
+        if data.any_fail:
+            data.response = fixture.dut.set_factory_test_state(False)
+            data.expected_response = 0x4641494C
+        else:
+            data.response = fixture.dut.set_factory_test_state(True)            
+            data.expected_response = 0x50415353
+        data.accepted = (data.response == data.expected_response)
+
+
+    def teardown(self, data: Data):
+        pass
         
 
 

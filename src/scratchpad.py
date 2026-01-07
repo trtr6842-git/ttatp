@@ -24,7 +24,7 @@ def main():
     fixture.stm.set_vdut(0)           
     time.sleep(0.5)
     fixture.stm.set_vdut(5)
-    time.sleep(1.5)
+    time.sleep(5)
 
     fixture.dut.connect()
 
@@ -67,46 +67,46 @@ def main():
 
 
 
-    l_configs = [0b1111, 0b1110, 0b1101, 0b1011, 0b0111]
-    print(l_configs)
-    f_centers = [72.666e3, 65.666e3, 60.666e3, 51.666e3, 41.333e3]
+    # l_configs = [0b1111, 0b1110, 0b1101, 0b1011, 0b0111]
+    # print(l_configs)
+    # f_centers = [72.666e3, 65.666e3, 60.666e3, 51.666e3, 41.333e3]
     
-    f0s = []
-    ks = []
+    # f0s = []
+    # ks = []
     
-    for i in range(len(f_centers)):
-        fs = f_deltas + f_centers[i]
-        pers = np.round(64e6 / fs).astype(int)
-        fixture.dut.set_pwm_state(0)
-        fixture.dut.set_tuning(l_configs[i])
-        time.sleep(0.02)
-        fixture.dut.set_pwm_state(1)
+    # for i in range(len(f_centers)):
+    #     fs = f_deltas + f_centers[i]
+    #     pers = np.round(64e6 / fs).astype(int)
+    #     fixture.dut.set_pwm_state(0)
+    #     fixture.dut.set_tuning(l_configs[i])
+    #     time.sleep(0.02)
+    #     fixture.dut.set_pwm_state(1)
 
-        ipts = []
+    #     ipts = []
 
-        for j in range(len(fs)):
-            ft = fs[j]
-            per = pers[j]
+    #     for j in range(len(fs)):
+    #         ft = fs[j]
+    #         per = pers[j]
 
-            fixture.dut.set_pwm_per_ccr(per, per//2)
-            adc = fixture.stm.measure_adc_hs()
-            iout = adc[0,:]
-            rms = np.std(iout)
-            freqs, iout_fft = fixture.compute_adc_fft(iout, f_target=ft)
-            dft = np.abs(iout_fft[int(ft/freqs[1])])
+    #         fixture.dut.set_pwm_per_ccr(per, per//2)
+    #         adc = fixture.stm.measure_adc_hs()
+    #         iout = adc[0,:]
+    #         rms = np.std(iout)
+    #         freqs, iout_fft = fixture.compute_adc_fft(iout, f_target=ft)
+    #         dft = np.abs(iout_fft[int(ft/freqs[1])])
 
-            ipts.append(dft)
+    #         ipts.append(dft)
 
-            print("{:04b}".format(l_configs[i]), i, per, per//2, ft, dft, rms)
+    #         print("{:04b}".format(l_configs[i]), i, per, per//2, ft, dft, rms)
 
-        f0, K, pk_idx = fixture.estimate_peak(fs, ipts)
-        f0s.append(f0)
-        ks.append(K)
-        print(f0, K, (2 * np.pi * f0)**-2 / 40e-9)
+    #     f0, K, pk_idx = fixture.estimate_peak(fs, ipts)
+    #     f0s.append(f0)
+    #     ks.append(K)
+    #     print(f0, K, (2 * np.pi * f0)**-2 / 40e-9)
 
-    # for i in range(len(f0s)):
-    #     for j in range(len(f_deltas)):
-    #         print(f0s[i], qs[i], ks[i])
+    # # for i in range(len(f0s)):
+    # #     for j in range(len(f_deltas)):
+    # #         print(f0s[i], qs[i], ks[i])
     
     fixture.dut.set_pwm_state(0)
     fixture.stm.set_vdut(0)

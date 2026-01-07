@@ -16,6 +16,7 @@ class Atp(automation.TestDefinition):
         # ATP version/revision, displaying in TestCenter and generated SiSteps docs
         self.version = "v{major}.{minor}.{patch}".format(major=0, minor=1, patch=0)
         
+        
 
     class Data:
         def __init__(data):
@@ -24,6 +25,10 @@ class Atp(automation.TestDefinition):
 
             # You can also set Step parameters for the top-level step here
             data.step_is_resilient = False # Tells automation to still try following steps if one fails, unless it was as requiremnt
+            data.any_fail = False
+
+    def on_step_failure(self, step):
+        self.data.any_fail = True
 
 
     def define_test(self, data: Data):
@@ -43,7 +48,7 @@ class Atp(automation.TestDefinition):
             PowerUp(title='DUT Power Up Erase', imax=0.05, boot=True, skip=False,)(
                 EraseAll(title='Erase All')
             ),
-            PowerUp(title='DUT Power Up Flash Main', boot=True, skip=False, step_retry=2)(
+            PowerUp(title='DUT Power Up Flash Main', boot=True, skip=False)(
                 FlashMain(title='Flash Main')
             ),
             PowerUp(title='DUT Power Up Flash Boot', boot=True, skip=False)(
@@ -53,7 +58,8 @@ class Atp(automation.TestDefinition):
                 PowerUp(title='DUT Power Up Functional Test', imax=0.5, lcd='Functional Test', skip=False)(
                     GetUid(title='Read UID', skip=False),
                     MeasureResonance(title='Measure Resonance', skip=False),
-                    AutoTune(title='Auto Tune')
+                    AutoTune(title='Auto Tune', skip=False),
+                    WritePass(title='Write Passing Result', any_fail=self.data.any_fail, skip=False)
                 )
             )
 
@@ -90,7 +96,7 @@ class Atp(automation.TestDefinition):
         self.fields.update_entries({
             "STM32 UID": fixture.dut_uid
         })
-        # Write the full test outcome to a .CSV file      
+        # Write the full test outcome to a .CSV file     
         part_number, serial_number, datetime = self.fields.get_entries("PartNumber", "STM32 UID", "DateTime")
         passfail = 'PASS' if self.result else 'FAIL'
         filename = f"{part_number}_{passfail}_{datetime}_{serial_number}_Report.csv".replace("/", "-").replace("\\", "-").replace(":", "-").replace(' ', '_')
